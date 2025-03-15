@@ -9,7 +9,7 @@ app=FastAPI()
 
 db_connect = mysql.connector.connect(
     user="root",
-    password="Ling0424J",
+    password="Ling0424J####",
     host="localhost",
     database="website",
 )
