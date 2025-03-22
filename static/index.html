@@ -4,8 +4,219 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Index</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  
+<div class="navbar">
+  <div class="nav-text">
+    <h2>台北一日遊</h2>
+    <div class="nav-list">
+      <p>預定行程</p>
+      <p>登入/註冊</p>
+    </div>
+  </div>
+</div>
+<div class="hero-section">
+  <div class="slogan">
+    <div class="slogan-text">
+      <h1>輕鬆享受台北一日悠閒</h1>
+      <p>探索每個角落，體驗城市的深度旅遊行程</p>
+    </div>
+    <div class="search-bar">
+      <form id="search-keyword">
+        <input type="text" name="keyword" placeholder="輸入景點名稱查詢" id="keyword">
+        <button type="submit">
+          <img src="/static/icon/icon_search.png" alt="搜尋圖示" width="30" height="30">
+        </button>
+      </form>
+    </div>
+  </div>  
+</div>
+<div class="main">
+  <div class="h-list-bar">
+    <div class="left-btn" onclick="scrollList(-100)">
+      <img src="/static/icon/left-icon.png" alt="往左圖示" width="32" height="32">
+    </div>
+    <div class="list-wrapper">
+      <ul class="h-list" id="h-item"></ul>
+    </div>
+    <div class="right-btn" onclick="scrollList(+100)">
+      <img src="/static/icon/right-icon.png" alt="往右圖示" width="32" height="32">
+    </div>
+  </div>
+
+  <div class="grid-container" id="grid-container"></div>
+
+
+</div>
+
+<div class="footer" id="footer">
+  <p>COPYRIGHT © 2021 台北一日遊</p>
+</div>
 </body>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function(){
+    fetchMRTs();
+    fetchAttractions();
+  });
+
+  async function fetchMRTs() {
+    try {
+      let response = await fetch("/api/mrts");
+      let data = await response.json();
+
+      let ul = document.getElementById("h-item");
+      ul.innerHTML = ""; 
+
+      data.data.forEach(item => {
+        let li = document.createElement("li");
+        li.textContent = item;
+        
+        li.addEventListener("click", async function () {
+          let keyword = li.textContent;
+          document.getElementById("keyword").value = keyword; 
+          isSearching = true;
+          page = 0; // 重置
+          nextPage = 1; // 重置
+          gridContainer.innerHTML = ""; 
+
+          await fetchAttractions(keyword); 
+        });
+
+        ul.appendChild(li);
+      });
+
+    } catch (error) {
+      console.error("取得MRT資料失敗", error);
+    }
+  }
+
+
+  function scrollList(amount){
+    let scrollAmount = 0;
+    let listWrapper = document.querySelector(".list-wrapper")
+
+    scrollAmount += amount;
+    listWrapper.scrollLeft += amount; 
+    // console.log(listWrapper.scrollLeft)
+  }
+
+
+  function createAttraction(name, mrt, category, imageUrl){
+
+    let n1 = document.createElement("div");
+    n1.classList.add("attraction");
+    let n2 = document.createElement("div");
+    n2.classList.add("attraction-pic");
+    let n3 = document.createElement("img");
+    n3.setAttribute("src", imageUrl);
+    let n4 = document.createElement("div");
+    n4.classList.add("pic-text");
+    n4.innerText = name;
+    let n5 = document.createElement("div");
+    n5.classList.add("attraction-text");
+    let n6 = document.createElement("div");
+    n6.classList.add("info-1");
+    n6.innerText = mrt;
+    let n7 = document.createElement("div");
+    n7.classList.add("info-2");
+    n7.innerText = category;
+
+    n2.appendChild(n3);
+    n2.appendChild(n4);
+    n5.appendChild(n6);
+    n5.appendChild(n7);
+    n1.appendChild(n2);
+    n1.appendChild(n5);
+
+    let item = document.createElement("div");
+    item.classList.add("item")
+    item.appendChild(n1)
+    
+
+    return item
+  }
+
+
+  const gridContainer = document.getElementById("grid-container");
+  let page = 0;
+  let nextPage = 1;
+  let isSearching = false;
+  let isLoading = false;
+
+  async function fetchAttractions(keyword = "") {
+    if (nextPage === null) {
+      console.log("已經沒有更多景點資料");
+      return;
+    }
+
+    // 如果正在載入中，則不執行新的請求
+    if (isLoading) return;
+    isLoading = true;
+
+    try {
+      let response = await fetch(`/api/attractions?page=${page}&keyword=${keyword}`);
+      let data = await response.json();
+
+      nextPage = data.nextPage; 
+      data.data.forEach(item => {
+        let name = item.name;
+        let category = item.category;
+        let mrt = item.mrt;
+        let imageUrl = item.images[0];
+        let attraction = createAttraction(name, mrt, category, imageUrl);
+        gridContainer.appendChild(attraction);
+      });
+
+      page = nextPage; 
+
+    } catch (error) {
+      console.error("資料載入失敗:", error);
+    } finally {
+      isLoading = false; // 重置
+    }
+  }
+  
+  document.getElementById("search-keyword").addEventListener("submit",async function(event){
+    let keyword = document.getElementById("keyword").value.trim();
+    event.preventDefault();
+    if (keyword ===""){
+      alert("請輸入關鍵字(ex:捷運站名或景點名稱)！");
+      return;
+    }
+
+    isSearching = true;
+    page = 0; // 重置
+    nextPage = 1; // 重置
+    gridContainer.innerHTML = ""; 
+    try {
+      await fetchAttractions(keyword); 
+    } catch (error) {
+      console.error("資料載入錯誤:", error);
+    }
+  });
+
+
+  const observer = new IntersectionObserver(async (entries) =>{
+    let keyword = document.getElementById("keyword").value.trim();
+    if (entries[0].isIntersecting && nextPage !== null && !isLoading){
+      if (isSearching){
+        await fetchAttractions(keyword);
+      }else{
+        await fetchAttractions();
+      }
+    }
+  },{
+    threshold: 0.5 
+  });
+
+  const loadingElement = document.getElementById("footer");
+  observer.observe(loadingElement);
+
+</script>
+
+
 </html>
