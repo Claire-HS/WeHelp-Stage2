@@ -1,4 +1,5 @@
 from fastapi import *
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 import mysql.connector
 import json
@@ -6,6 +7,8 @@ from collections import Counter
 from typing import Annotated
 
 app=FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 db_connect = mysql.connector.connect(
     user="root",
