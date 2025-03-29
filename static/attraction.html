@@ -4,8 +4,234 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attraction</title>
+  <link rel="stylesheet" href="/static/style.css">  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  
+<body class="page-attraction">
+  <div class="navbar">
+    <div class="nav-text">
+      <h2><a href="/">台北一日遊</a></h2>
+      <div class="nav-list">
+          <p>預定行程</p>
+          <p>登入/註冊</p>
+      </div>
+    </div>
+  </div>
+  <div class="container-attraction">
+    <div class="section-main">
+      <div class="attraction-pic" id="attraction-pic">
+        <div class="left-btn">
+          <img src="/static/icon/left-icon.png" alt="往左圖示" width="36px" height="36px">
+        </div>
+        <div class="right-btn">
+          <img src="/static/icon/right-icon.png" alt="往右圖示" width="36px" height="36px">
+        </div>
+        <div class="picture-indicator" id="picture-indicator"></div>
+      </div>
+      <div class="attraction-profile">
+        <h3 id="name">景點名稱</h3>
+        <p class="profile-text"><span id="category"></span>at<span id="mrt"></span></p>
+        <div class="booking-section">
+          <p class="bs-title">訂購導覽行程</p>
+          <p class="bs-text">以此景點為中心的一日行程，帶您探索城市角落故事</p>
+          <div class="options-seldate">
+            <label for="seldate">選擇日期：</label>
+            <input type="date" name="seldate" id="seldate">
+            <div class="calendar-icon" id="calendar-icon">
+              <img src="/static/icon/icon_calendar.png" alt="日曆圖示" width="24px" height="24px">
+            </div>
+          </div>
+          <div class="options-seltime">
+            <p>選擇時間：</p>
+            <div class="radio-group">
+              <label for="morning">
+                <input type="radio" name="time" value="2000" id="morning" checked onclick="updatePrice(this)"> 上半天
+              </label>
+              <label for="afternoon">
+                <input type="radio" name="time" value="2500" id="afternoon" onclick="updatePrice(this)"> 下半天
+              </label>
+            </div>
+          </div>
+          <div class="options-price">
+            <p class="op-title">導覽費用：</p>
+            <p class="op-text">新台幣 <span id="price"></span> 元</p>
+          </div>
+          <div class="booking-submit">開始預約行程</div>
+        </div>
+      </div>
+    </div>
+    <div class="infors">
+      <div class="description" id="description"></div>
+      <div class="infors-text">景點地址：</div>
+      <div class="address" id="address"></div>
+      <div class="infors-text">交通方式：</div>
+      <div class="transport" id="transport"></div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>COPYRIGHT © 2021 台北一日遊</p>
+  </div>
 </body>
+
+<script>
+
+// 從URL取得attractionID
+function getAttractionId() {
+  const path = window.location.pathname;
+  const parts = path.split("/");
+  let ID = parts[parts.length - 1];
+  return ID;
+}
+
+
+// fetch API 
+async function fetchAttraction() {
+  const attractionID = getAttractionId();
+  try {
+    let response = await fetch(`/api/attraction/${attractionID}`);
+    let data = await response.json();
+    // console.log(data)
+
+    document.getElementById("name").innerText = data.data.name;
+    document.getElementById("category").innerText = data.data.category;
+    document.getElementById("mrt").innerText = data.data.mrt;
+    document.getElementById("description").innerText = data.data.description;
+    document.getElementById("address").innerText = data.data.address;
+    document.getElementById("transport").innerText = data.data.transport;
+
+    let imageUrls = data.data.images;
+    // console.log(attractionPics);
+    return imageUrls;
+
+  } catch (error) {
+      console.error("資料載入失敗:", error);
+    }
+}
+
+
+// Image Slideshow
+let currentSlide = 0;
+let slides, dots;
+const attractionPic = document.getElementById("attraction-pic");
+const indicator = document.getElementById("picture-indicator");
+const leftBtn = document.querySelector(".left-btn");
+const rightBtn = document.querySelector(".right-btn");
+
+function CreateSlide(imageUrls) {
+
+  imageUrls.forEach((image, index) => {
+    const slide = document.createElement("div");
+    slide.className = `slide ${index === 0 ? "active" : ""}`; //第一個slide添加active類
+                    
+    const img = document.createElement('img');
+    img.src = image;
+    img.alt = `景點圖片 ${index + 1}`;
+                    
+    slide.appendChild(img);
+    attractionPic.appendChild(slide);
+
+    // 創建導航點
+    const dot = document.createElement("span");
+    dot.className = `dot ${index === 0 ? "active" : ""}`;
+    dot.dataset.index = index;
+    indicator.appendChild(dot);
+  });
+
+  slides = document.querySelectorAll(".slide");
+  dots = document.querySelectorAll(".dot");
+}
+
+
+// 只顯示當前幻燈片
+function showSlide(index) {
+  slides.forEach(slide => {
+    slide.classList.remove("active");
+  });
+                      
+  dots.forEach(dot => {
+    dot.classList.remove("active");
+  });
+                      
+  slides[index].classList.add("active");
+  dots[index].classList.add("active");
+                      
+  currentSlide = index;
+}
+
+function nextSlide() {
+  currentSlide = (currentSlide + 1) % slides.length; //for循環效果
+  showSlide(currentSlide);
+}
+                
+function prevSlide() {
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length; //for循環效果
+  showSlide(currentSlide);
+}
+
+
+// 初始化輪播
+async function initSlideshow() {
+  const imageUrls = await fetchAttraction();
+  if (imageUrls.length > 0) {
+    CreateSlide(imageUrls);
+    
+    rightBtn.addEventListener("click", nextSlide);
+    leftBtn.addEventListener("click", prevSlide);
+    
+    dots.forEach(dot => {
+      dot.addEventListener("click", function() {
+        const slideIndex = parseInt(this.dataset.index);
+        showSlide(slideIndex);
+      });
+    });
+    
+    showSlide(0);
+  }
+}
+
+
+
+// 不論使用者時區，日期皆以台灣時間為基準。
+function getTaipeiDate() {
+  let now = new Date();
+  
+  let taipeiTime = new Intl.DateTimeFormat("zh-TW", { 
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(now);
+
+  let formattedDate = taipeiTime.replace(/\//g, '-');
+  return formattedDate;
+}
+
+// 依行程時間更新費用
+function updatePrice(radio) {
+  let formattedPrice = Number(radio.value).toLocaleString(); //千元表達
+  document.getElementById("price").textContent = formattedPrice;
+}
+
+
+// 載入頁面
+document.addEventListener("DOMContentLoaded", function() {
+
+  initSlideshow();
+  
+  // 不可選擇當日以前的日期
+  document.getElementById("seldate").setAttribute("min", getTaipeiDate());
+
+  // 點擊自訂icon可選日期
+  document.getElementById("calendar-icon").addEventListener("click",function(){
+    document.getElementById("seldate").showPicker();
+  });
+
+  //預設及更新導覽費用
+  let initialPrice = document.querySelector('input[name="time"]:checked').value;
+  document.getElementById("price").textContent = Number(initialPrice).toLocaleString();
+});
+
+
+</script>
+
 </html>

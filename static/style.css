@@ -4,8 +4,13 @@
     box-sizing: border-box; 
 }
 
-body {
+body{
     padding-top: 54px; 
+    font-family: "Noto Sans TC",sans-serif;
+}
+
+.page-attraction {
+    padding-top: 94px; 
     font-family: "Noto Sans TC",sans-serif;
 }
 
@@ -37,6 +42,13 @@ body {
     font-size: 30px;
     color:#448899;
     font-weight: bold;
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none; 
+    color: inherit;  
+    display: block;  
 }
 
 .nav-list{
@@ -140,7 +152,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative; 
+    bottom: 0;
 }
+
+.page-attraction .footer{
+    width: 100%;
+    height: 104px;
+    padding: 40px 0px;
+    background-color: #757575;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; 
+    bottom: 0;
+}
+
+
 
 .footer p{
     width: 234px;
@@ -151,6 +180,7 @@ body {
     color: #FFFFFF;
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 5px 0px;
 }
 
@@ -304,6 +334,426 @@ body {
     flex: 1;
 }
 
+/* page-attraction */
+.page-attraction .navbar{
+    width: 100%;
+    padding: 10px 0px;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #E8E8E8;
+}
+
+.container-attraction{
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-main{
+    width: 100%;
+    height: 400px;
+    padding: 0px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+
+.page-attraction .attraction-pic{
+    width: 100%;
+    max-width: 540px;
+    height: 400px;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+}
+
+.slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.slide.active {
+    display: block;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: opacity 0.5s ease;
+}
+
+.page-attraction .left-btn{
+    width: 36px;
+    height: 36px;
+    padding: 0px;
+    position: absolute;
+    top: 182px;
+    left: 10px;
+    opacity: 0.75;
+}
+
+.page-attraction .right-btn{
+    width: 36px;
+    height: 36px;
+    padding: 0px;
+    position: absolute;
+    top: 182px;
+    right: 10px;
+    opacity: 0.75;
+}
+
+.picture-indicator{
+    width: fit-content;
+    height: auto;
+    position: absolute;
+    left: 0; 
+    right: 0;
+    margin: auto; 
+    opacity: 0.75;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90%;
+    max-height: 100%; 
+    bottom: 10px;
+    gap: 6px; 
+    /* overflow-y: hidden;  */
+    align-items: flex-end; 
+}
+
+.dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0px 6px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+}
+        
+.dot.active {
+    background-color:#000000;
+    border: 1px solid #FFFFFF;
+}
+
+.attraction-profile{
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.attraction-profile h3{
+    width: 100%;
+    max-width: 600px;
+    height: 33px;
+    font-weight: 700px;
+    font-size: 24px;
+    line-height: 24px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+}
+
+.profile-text{
+    width: 100%;
+    max-width: 600px;
+    height: 22px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 13.3px;
+    color: #666666;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.profile-text span {
+    margin: 0 5px; 
+}
+
+.booking-section{
+    width: 100%;
+    max-width: 600px;
+    height: 302px;
+    margin-top: 20px;
+    border-radius: 5px;
+    background-color: #E8E8E8;
+    display: flex;
+    flex-direction: column;
+}
+
+.bs-title{
+    max-width: 560px;
+    height: 22px;
+    margin: 15px 20px 0px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 13.3px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+
+}
+
+.bs-text{
+    max-width: 560px;
+    height: 24px;
+    margin: 15px 20px 0px 20px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 13.3px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+}
+
+.options-seldate{
+    max-width: 560px;
+    height: 35px;
+    margin: 15px 20px 0px 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.options-seldate label{
+    width: 81px;
+    height: 17px;
+    margin: 9px 5px 9px 0px;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 13.3px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+}
+
+.options-seldate input{
+    appearance: none; /* 移除默認樣式 */
+    width: 193px;
+    height: 35px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 13.3px;
+    padding: 5px 34px 5px 10px;
+    color: #000000;
+    border: #FFFFFF;
+}
+
+/* 隱藏內建日曆圖示 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+.calendar-icon{
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    left: 245px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.options-seltime{
+    max-width: 560px;
+    height: 22px;
+    margin: 15px 20px 0px 20px;
+    display: flex;
+}
+
+.options-seltime p{
+    width: 81px;
+    height: 22px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 13.3px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
+.radio-group{
+    display: flex;
+    align-items: center;
+}
+
+.radio-group label{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 87px;
+    height: 22px;
+    font-size: 16px;
+    line-height: 13.3px;
+    font-weight: 400;
+    color: #666666;
+    margin-right: 5px;
+}
+
+input[type="radio"]{
+    appearance: none; /* 移除默認樣式 */
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    position: relative;
+    cursor: pointer;
+    margin-left: 5px;
+    margin-right: 4px;
+}
+
+/* 內圈 (選中時才顯示) */
+input[type="radio"]:checked::before{
+    content: "";
+    width: 18px;
+    height: 18px;
+    background-color:#448899;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.options-price{
+    max-width: 560px;
+    height: 22px;
+    margin: 15px 20px 0px 20px;
+    display: flex;
+}
+
+.op-title{
+    width: 81px;
+    height: 22px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 13.3px;
+    margin-right: 5px;
+    color: #666666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.op-text{
+    width: 114px;
+    height: 22px;
+    padding: 4px 0px;
+    font-size: 16px;
+    line-height: 13.3px;
+    font-weight: 400;
+    color: #666666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.op-text span{
+    margin: 0px 5px;
+}
+
+.booking-submit{
+    width: 154px;
+    height: 36px;
+    margin: 25px 20px 0px 20px;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 19px;
+    line-height: 16px;
+    font-weight: 400;
+    background-color: #448899;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+}
+
+.infors{
+    width: 100%;
+    max-width: 1200px;
+    min-height: 402px;
+    max-height: fit-content;
+    padding-top: 39px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-top: 1px solid #E8E8E8;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.description{
+    max-width: 1180px;
+    min-height: 96px;
+    max-height: fit-content;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    color: #666666;
+    text-align: justify;
+}
+
+.infors-text{
+    width: 100%;
+    max-width: 1180px;
+    height: 32px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 13.3px;
+    color: #666666;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.address{
+    width: 100%;
+    max-width: 1180px;
+    min-height: 24px;
+    max-height: fit-content;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    color: #666666;
+    text-align: justify;
+}
+
+.transport{
+    max-width: 1180px;
+    min-height: 48px;
+    max-height: fit-content;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    color: #666666;
+    text-align: justify;
+}
 
 @media (max-width: 900px){
     .grid-container{
@@ -316,14 +766,99 @@ body {
     }
 
     .attraction-pic{
-    height: 235px;
+        height: 235px;
     }
+
+    .bs-text{
+        height: 48px;
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 768px){
+
+    .section-main{
+        height: 100%;
+        padding: 0px;
+        flex-direction: column;
+        gap: 20px;
+    }
+
 }
 
 @media (max-width: 360px){
     .slogan{
         width: 340px;
     }
+
+    .infors{
+        width: 340px;
+    }
+
+    .container-attraction{
+        width: 360px;
+        align-items: center;
+    }
+
+    .section-main{
+        height: 100%;
+        padding: 0px;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .attraction-profile{
+        width: 340px;
+        height: 390px;
+    }
+    
+    .booking-section{
+        width: 340px;
+        height: 300px;
+    }
+
+    .bs-title{
+        width: 300px;
+    }
+
+    .bs-text{
+        width: 300px;
+        height: 48px;
+        line-height: 1.5;
+    }
+
+    .options-seldate{
+        width: 300px;
+    }
+
+    .options-seltime{
+        width: 300px;
+    }
+
+    .options-price{
+        width: 300px;
+    }
+
+    .page-attraction .attraction-pic{
+        width: 360px;
+        height: 350px;
+        border-radius: 0px;
+    }
+
+    .page-attraction .left-btn{
+        top: 157px;
+    }
+
+    .page-attraction .right-btn{
+        top: 157px;
+    }
+
+    .page-attraction {
+        padding-top: 0px; 
+    }
+
+
+
 }
 
 
