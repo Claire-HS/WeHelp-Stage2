@@ -488,8 +488,12 @@ a {
     align-items: center;
 }
 
-.profile-text span {
-    margin: 0 5px; 
+#category{
+    margin-right: 5px;
+}
+
+#mrt{
+    margin-left: 5px;
 }
 
 .booking-section{
