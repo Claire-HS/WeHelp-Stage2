@@ -467,7 +467,7 @@ a {
     width: 100%;
     max-width: 600px;
     height: 33px;
-    font-weight: 700px;
+    font-weight: 700;
     font-size: 24px;
     line-height: 24px;
     color: #666666;
@@ -759,6 +759,18 @@ input[type="radio"]:checked::before{
     text-align: justify;
 }
 
+
+@media(max-width: 1200px){
+    .page-attraction {
+        padding-top: 54px; 
+    }
+
+    .page-attraction .navbar{
+        border-bottom: 0px;
+    }
+}
+
+
 @media (max-width: 900px){
     .grid-container{
         grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));   
@@ -856,13 +868,6 @@ input[type="radio"]:checked::before{
     .page-attraction .right-btn{
         top: 157px;
     }
-
-    .page-attraction {
-        padding-top: 0px; 
-    }
-
-
-
 }
 
 
