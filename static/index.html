@@ -105,7 +105,7 @@
   }
 
 
-  function createAttraction(name, mrt, category, imageUrl){
+  function createAttraction(name, mrt, category, imageUrl, attractionId){
 
     let n1 = document.createElement("div");
     n1.classList.add("attraction");
@@ -132,12 +132,15 @@
     n1.appendChild(n2);
     n1.appendChild(n5);
 
-    let item = document.createElement("div");
-    item.classList.add("item")
-    item.appendChild(n1)
-    
+    let linkedItem = document.createElement("a");
+    linkedItem.setAttribute("href", `/attraction/${attractionId}`);
 
-    return item
+    let item = document.createElement("div");
+    item.classList.add("item");
+    item.appendChild(n1);
+    linkedItem.appendChild(item);
+
+    return linkedItem
   }
 
 
@@ -163,11 +166,12 @@
 
       nextPage = data.nextPage; 
       data.data.forEach(item => {
+        let attractionId = item.id;
         let name = item.name;
         let category = item.category;
         let mrt = item.mrt;
         let imageUrl = item.images[0];
-        let attraction = createAttraction(name, mrt, category, imageUrl);
+        let attraction = createAttraction(name, mrt, category, imageUrl, attractionId);
         gridContainer.appendChild(attraction);
       });
 
