@@ -1,10 +1,16 @@
 from fastapi import *
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import mysql.connector
 import json
 from collections import Counter
 from typing import Annotated
+from pydantic import BaseModel
+import jwt
+from datetime import datetime, timedelta, timezone
+from jwt import ExpiredSignatureError, InvalidTokenError
+
 
 app=FastAPI()
 
@@ -16,6 +22,21 @@ db_connect = mysql.connector.connect(
     host="localhost",
     database="website",
 )
+
+secret_key = "H$L511_O527%S"
+
+# Token 檢查工具（FastAPI 內建）
+bearer_scheme = HTTPBearer()
+
+
+class Signup(BaseModel):
+	name: str
+	email: str
+	password: str
+
+class Signin(BaseModel):
+	email: str
+	password: str
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -161,3 +182,100 @@ async def mrt_attractions(request: Request):
         )
 	else:
 		return {"data": sorted_mrt_stations}
+	
+
+@app.post("/api/user")
+async def signup(user: Signup):
+	try:
+		cursor = db_connect.cursor()
+		cursor.execute("SELECT * FROM tp_member WHERE BINARY email=%s", (user.email,))
+		existing_user = cursor.fetchone()
+		if existing_user:
+			return JSONResponse(
+				status_code = 400,
+				content = {
+					"error": True,
+  					"message": "Email 已註冊過帳戶"
+				}
+			)
+		else:
+			cursor.execute("INSERT INTO tp_member(name, email, password) VALUES(%s, %s, %s)", (user.name, user.email, user.password))
+			db_connect.commit()
+			cursor.close()
+	except:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤"
+			}
+		)
+	else: 
+		return JSONResponse(
+			status_code = 200,
+			content = {
+				"ok": True
+			} 
+		)
+
+@app.put("/api/user/auth")
+async def signin(user: Signin):
+	try:
+		cursor = db_connect.cursor()
+		cursor.execute("SELECT * FROM tp_member WHERE BINARY email=%s AND password=%s", (user.email, user.password))
+		member_checked = cursor.fetchone()
+		cursor.close()
+		if member_checked:
+			user_payload = {
+				"member_id": member_checked[0],   
+				"member_name": member_checked[1],
+				"member_email": member_checked[2],
+				"iat": datetime.now(timezone.utc),  # JWT 頒發時間
+				"exp": datetime.now(timezone.utc) + timedelta(days=7)  # JWT 過期時間
+			}
+
+			token = jwt.encode(user_payload, secret_key, algorithm="HS256")
+
+			return JSONResponse(
+				status_code = 200,
+				content = {
+					"token": token
+				}
+			)
+	except:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤"
+			}
+		)	
+	else:
+		return JSONResponse(
+			status_code = 400,
+			content = {
+				"error": True,
+  				"message": "電子信箱或密碼錯誤"
+			}
+		)	
+
+@app.get("/api/user/auth")
+async def get_user_info(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+	try:
+		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
+
+		member_info = {
+			"id": decoded_token["member_id"],
+            "name": decoded_token["member_name"],
+            "email": decoded_token["member_email"]
+		}
+
+		return JSONResponse(
+			status_code = 200,
+			content = {
+				"data" : member_info
+			}
+		)
+	except (ExpiredSignatureError, InvalidTokenError):
+		return {"data": None}
+			
