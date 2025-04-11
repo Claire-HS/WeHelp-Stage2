@@ -10,6 +10,9 @@ from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta, timezone
 from jwt import ExpiredSignatureError, InvalidTokenError
+from enum import Enum
+from datetime import date
+
 
 
 app=FastAPI()
@@ -37,6 +40,17 @@ class Signup(BaseModel):
 class Signin(BaseModel):
 	email: str
 	password: str
+
+class TimeSel(str, Enum):
+	morning = "morning"
+	afternoon = "afternoon"
+
+class BookingRequest(BaseModel):
+    attractionId: int
+    date: date
+    time: TimeSel
+    price: int
+
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -278,4 +292,85 @@ async def get_user_info(token: HTTPAuthorizationCredentials = Depends(bearer_sch
 		)
 	except (ExpiredSignatureError, InvalidTokenError):
 		return {"data": None}
+
+
+def get_current_member_id(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
+	try:
+		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
+		return decoded_token.get("member_id")
+	except Exception:
+		raise HTTPException(status_code=401, detail="無效的憑證")
+
+
+@app.post("/api/booking")
+async def create_or_update_booking(booking: BookingRequest,
+								   member_id: int = Depends(get_current_member_id)):
+	# 檢查登入狀態
+	try:
+		if member_id is None:
+			return JSONResponse(
+				status_code = 403,
+				content = {
+					"error": True,
+  					"message": "未登入系統，無法進行預約!"
+				} 
+			)
+		# 預約項目欄位是否完整
+		# if not all([booking.attractionId, booking.date, booking.time, booking.price]):
+		# 	return JSONResponse(
+		# 		status_code = 400,
+		# 		content = {
+		# 			"error": True,
+  		# 			"message": "預約失敗，請檢查全部選項是否已選取！"
+		# 		} 
+		# 	)
+
+		# 驗證時段價格
+		elif booking.time == "morning" and booking.price != 2000:
+			return JSONResponse(
+				status_code = 400,
+				content = {
+					"error": True,
+  					"message": "預約失敗，行程價格有誤！"
+				} 
+			)
+		elif booking.time == "afternoon" and booking.price != 2500:
+			return JSONResponse(
+				status_code = 400,
+				content = {
+					"error": True,
+  					"message": "預約失敗，行程價格有誤！"
+				} 
+			)
+		
+		cursor = db_connect.cursor()
+		cursor.execute("SELECT * FROM tp_order WHERE member_id = %s", (member_id,))
+		existing = cursor.fetchone()
+
+		# 檢查是否已有預約項目，若有，更新預約; 若無，新增當前預約
+		if existing:
+			cursor.execute("UPDATE tp_order SET attractionId =%s, tourDate =%s, dateTime =%s, price =%s, created_at=%s WHERE member_id =%s"
+				  , (booking.attractionId, booking.date, booking.time, booking.price, datetime.now(),member_id))
+		else: 
+			cursor.execute("INSERT INTO tp_order(member_id, attractionId, tourDate, dateTime, price, created_at) VALUES(%s, %s, %s, %s, %s, %s)"
+				  , (member_id, booking.attractionId, booking.date, booking.time, booking.price, datetime.now()))
 			
+		db_connect.commit()
+		cursor.close()
+		db_connect.close()		
+			
+		return JSONResponse(
+			status_code = 200,
+			content = {
+				"ok": True
+			} 
+		)
+	except:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤"
+			}
+		)	
+
