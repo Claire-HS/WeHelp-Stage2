@@ -20,7 +20,9 @@ def create_table():
             tourDate DATE,
             dateTime VARCHAR(255),
             price INT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            paymentStatus VARCHAR(255),
+            paid_at DATETIME DEFAULT NULL
         );
     """
     cursor.execute(create_table)

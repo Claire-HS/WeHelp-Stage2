@@ -69,100 +69,186 @@
     </div>
   </div>
   <div class="bookingPage-title">
-    <p>您好，<span id="name">XXX</span>，待預訂的行程如下：</p>
+    <p>您好，<span id="memberName"></span>，待預訂的行程如下：</p>
   </div>
-  <div class="order-item">
-    <div class="item-pic"></div>
-    <div class="item-info">
-      <p class="order-item-title">台北一日遊： <span id="itemName">test</span></p>
-      <p>日期：<span id="itemDate">test</span></p>
-      <p>時間：<span id="itemTime">test</span></p>
-      <p>費用：<span id="itemExp">test</span></p>
-      <p>地點：<span id="itemAddress">test</span></p>
-      <div class="del-btn">
-        <img src="/static/icon/icon_delete.png" alt="項目刪除" width="30px" height="30px">
+  <div class="section" id="bookingSection"> 
+    <div class="order-item">
+      <div class="item-pic"></div>
+      <div class="item-info">
+        <p class="order-item-title">台北一日遊： <span id="itemName"></span></p>
+        <p>日期：<span id="itemDate"></span></p>
+        <p>時間：<span id="itemTime"></span></p>
+        <p>費用：<span id="itemExp"></span></p>
+        <p>地點：<span id="itemAddress"></span></p>
+        <div class="del-btn">
+          <img src="/static/icon/icon_delete.png" alt="項目刪除" width="30px" height="30px">
+        </div>
       </div>
     </div>
+    <hr>
+    <div class="contact-info">
+      <p>您的聯絡資訊</p>
+      <form>
+        <div>
+          <label for="contactName">聯絡姓名：</label>
+          <input type="text" name="contactName" id="contactName" 
+                  pattern="^\S.*\S$"
+                  title="姓名前後不可包含空格"
+                  required>
+        </div>
+        <div>       
+          <label for="contactMail">連絡信箱：</label>
+          <input type="email" name="contactMail" id="contactMail"
+                  pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
+                  title="請輸入有效的電子信箱格式"
+                  required>
+        </div>
+        <div>      
+          <label for="contactMobile">手機號碼：</label>
+          <input type="tel" name="contactMobile" id="contactMobile" 
+                  inputmode="numeric"
+                  required>
+        </div>         
+      </form>
+      <p class="addition-text">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</p>
+    </div>
+    <hr>
+    <div class="payment-info">
+      <p>信用卡付款資訊</p>
+      <form>
+        <div>
+          <label for="cardNo">卡片號碼：</label>
+          <input type="text" name="cardNo" id="cardNo" 
+                  placeholder="**** **** **** ****"
+                  maxlength="19"
+                  pattern="(?:\d{4} ){3}\d{4}"
+                  inputmode="numeric"
+                  autocomplete="cc-number" 
+                  title="請輸入 16 位數的卡號"
+                  required>
+        </div>
+        <div>       
+          <label for="expiryDate">過期時間：</label>
+          <input type="email" name="expiryDate" id="expiryDate"
+                  placeholder="MM/YY" 
+                  maxlength="5" 
+                  pattern="^(0[1-9]|1[0-2])\/\d{2}$"
+                  inputmode="numeric"
+                  title="請輸入有效的月份"
+                  required>
+        </div>
+        <div>      
+          <label for="cvv">驗證密碼：</label>
+          <input type="text" name="cvv" id="cvv" 
+                  placeholder="CVV"
+                  maxlength="3"
+                  pattern="\d{3}"
+                  inputmode="numeric"
+                  required>
+        </div>         
+      </form>
+    </div>
+    <hr>
+    <div class="order-confirm">
+        <p>總價：新台幣 <span id="totalAmount"></span> 元</p>
+        <button id="order-submit">確認訂購並付款</button>
+    </div>
   </div>
-  <hr>
-  <div class="contact-info">
-    <p>您的聯絡資訊</p>
-    <form>
-      <div>
-        <label for="contactName">聯絡姓名：</label>
-        <input type="text" name="contactName" id="contactName" 
-                pattern="^\S.*\S$"
-                title="姓名前後不可包含空格"
-                required>
-      </div>
-      <div>       
-        <label for="contactMail">連絡信箱：</label>
-        <input type="email" name="contactMail" id="contactMail"
-                pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
-                title="請輸入有效的電子信箱格式"
-                required>
-      </div>
-      <div>      
-        <label for="contactMobile">手機號碼：</label>
-        <input type="tel" name="contactMobile" id="contactMobile" 
-                inputmode="numeric"
-                required>
-      </div>         
-    </form>
-    <p class="addition-text">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</p>
-  </div>
-  <hr>
-  <div class="payment-info">
-    <p>信用卡付款資訊</p>
-    <form>
-      <div>
-        <label for="cardNo">卡片號碼：</label>
-        <input type="text" name="cardNo" id="cardNo" 
-                placeholder="**** **** **** ****"
-                maxlength="19"
-                pattern="(?:\d{4} ){3}\d{4}"
-                inputmode="numeric"
-                autocomplete="cc-number" 
-                title="請輸入 16 位數的卡號"
-                required>
-      </div>
-      <div>       
-        <label for="expiryDate">過期時間：</label>
-        <input type="email" name="expiryDate" id="expiryDate"
-                placeholder="MM/YY" 
-                maxlength="5" 
-                pattern="^(0[1-9]|1[0-2])\/\d{2}$"
-                inputmode="numeric"
-                title="請輸入有效的月份"
-                required>
-      </div>
-      <div>      
-        <label for="cvv">驗證密碼：</label>
-        <input type="text" name="cvv" id="cvv" 
-                placeholder="CVV"
-                maxlength="3"
-                pattern="\d{3}"
-                inputmode="numeric"
-                required>
-      </div>         
-    </form>
-  </div>
-  <hr>
-  <div class="order-confirm">
-      <p>總價：新台幣 <span id="totalAmount"></span> 元</p>
-      <button id="order-submit">確認訂購並付款</button>
-  </div>
-  <div class="footer">
+  <div class="footer" id="footer">
     <p>COPYRIGHT © 2021 台北一日遊</p>
   </div>
   
 </body>
 <script>
-    document.addEventListener("DOMContentLoaded", function(){
-    checkUserStatus();
+
+  async function getUnpaidBooking() {
+    const token = localStorage.getItem("jwt_token");
+
+    try {
+      let response = await fetch("/api/booking", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      let result = await response.json();
+      // console.log(result);
+      
+      let payload = token.split('.')[1]; 
+      let decoded = JSON.parse(atob(payload));
+      let userName = decoded.member_name; 
+      let memberName = document.getElementById("memberName");
+      memberName.innerText = userName;
+
+      if (result.data === null) {
+        let bookingSection = document.getElementById("bookingSection");
+        bookingSection.innerHTML = "";
+        let message = document.createElement("div");
+        message.textContent = "目前沒有任何待預訂的行程";
+        message.className = "null-message";
+        bookingSection.appendChild(message);
+
+        let footer = document.getElementById("footer");
+        footer.style.height = "865px";
+        footer.style.alignItems = "flex-start";
+
+      } else {
+        let itemName = document.getElementById("itemName");
+        let itemDate = document.getElementById("itemDate");
+        let itemTime = document.getElementById("itemTime");
+        let itemExp = document.getElementById("itemExp");
+        let itemAddress = document.getElementById("itemAddress");
+
+        let attraction = result.data.attraction;
+        let name = attraction.name;
+        let address = attraction.address;
+        let imageUrl = attraction.image;
+
+        let date = result.data.date;
+        let time = result.data.time;
+        let price = result.data.price;
+
+        
+
+        itemName.innerText = name;
+        itemDate.innerText = date;
+        itemTime.innerText = time;
+        itemExp.innerText = price;
+        itemAddress.innerText = address;
+
+
+
+      }
+
+
+
+
+
+    }
+    catch(e){
+      
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function() {
+     getUnpaidBooking()
+});
+
+ 
+ 
+
+
+
+
+
+
+  document.addEventListener("DOMContentLoaded", async function() {
+    const isLoggedIn = await checkUserStatus();
+    if (!isLoggedIn) {
+      window.location.href = "/";
+    }
   });
-
-
 
   const cardInput = document.getElementById("cardNo");
   const expiryInput = document.getElementById("expiryDate");

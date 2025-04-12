@@ -141,7 +141,6 @@ async function fetchAttraction() {
   try {
     let response = await fetch(`/api/attraction/${attractionID}`);
     let data = await response.json();
-    // console.log(data)
 
     document.getElementById("name").innerText = data.data.name;
     document.getElementById("category").innerText = data.data.category;
@@ -151,7 +150,6 @@ async function fetchAttraction() {
     document.getElementById("transport").innerText = data.data.transport;
 
     let imageUrls = data.data.images;
-    // console.log(attractionPics);
     return imageUrls;
 
   } catch (error) {
@@ -302,9 +300,6 @@ bookingSubmit.addEventListener("click", async() => {
   let timeOption = document.querySelector("input[name='time']:checked")
   let time = timeOption.id;
   let price = Number(timeOption.value);
-  // console.log(typeof attractionId);
-  // console.log(typeof price);
-  // console.log("attractionId, date, time, price:", attractionId, date, time, price)
 
   if (!date) {
     alert("請選擇預約日期！");

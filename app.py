@@ -51,6 +51,11 @@ class BookingRequest(BaseModel):
     time: TimeSel
     price: int
 
+class Member(BaseModel):
+	# member_name: str
+	# member_email: str
+	member_id: int
+
 
 # Static Pages (Never Modify Code in this Block)
 @app.get("/", include_in_schema=False)
@@ -294,20 +299,30 @@ async def get_user_info(token: HTTPAuthorizationCredentials = Depends(bearer_sch
 		return {"data": None}
 
 
-def get_current_member_id(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
+# def get_current_member_id(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
+# 	try:
+# 		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
+# 		return decoded_token.get("member_id")
+# 	except Exception:
+# 		raise HTTPException(status_code=401, detail="無效的憑證")
+
+def get_current_member(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> Member:
 	try:
 		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
-		return decoded_token.get("member_id")
+		return Member(
+			member_id = decoded_token.get("member_id"),
+			# member_name = decoded_token.get("member_name"),
+			# member_email = decoded_token.get("member_email")
+		)
 	except Exception:
-		raise HTTPException(status_code=401, detail="無效的憑證")
-
+		raise HTTPException(status_code=401, detail="無效的憑證") 
 
 @app.post("/api/booking")
 async def create_or_update_booking(booking: BookingRequest,
-								   member_id: int = Depends(get_current_member_id)):
+								   member: Member = Depends(get_current_member)):
 	# 檢查登入狀態
 	try:
-		if member_id is None:
+		if member.member_id is None:
 			return JSONResponse(
 				status_code = 403,
 				content = {
@@ -315,16 +330,6 @@ async def create_or_update_booking(booking: BookingRequest,
   					"message": "未登入系統，無法進行預約!"
 				} 
 			)
-		# 預約項目欄位是否完整
-		# if not all([booking.attractionId, booking.date, booking.time, booking.price]):
-		# 	return JSONResponse(
-		# 		status_code = 400,
-		# 		content = {
-		# 			"error": True,
-  		# 			"message": "預約失敗，請檢查全部選項是否已選取！"
-		# 		} 
-		# 	)
-
 		# 驗證時段價格
 		elif booking.time == "morning" and booking.price != 2000:
 			return JSONResponse(
@@ -342,22 +347,22 @@ async def create_or_update_booking(booking: BookingRequest,
   					"message": "預約失敗，行程價格有誤！"
 				} 
 			)
-		
+			
 		cursor = db_connect.cursor()
-		cursor.execute("SELECT * FROM tp_order WHERE member_id = %s", (member_id,))
+		# 目前限制最多一筆預約(未付款)
+		cursor.execute("SELECT * FROM tp_order WHERE member_id = %s AND paymentStatus =%s", (member.member_id, 'unpaid'))
 		existing = cursor.fetchone()
 
 		# 檢查是否已有預約項目，若有，更新預約; 若無，新增當前預約
 		if existing:
-			cursor.execute("UPDATE tp_order SET attractionId =%s, tourDate =%s, dateTime =%s, price =%s, created_at=%s WHERE member_id =%s"
-				  , (booking.attractionId, booking.date, booking.time, booking.price, datetime.now(),member_id))
+			cursor.execute("UPDATE tp_order SET attractionId =%s, tourDate =%s, dateTime =%s, price =%s, created_at=%s WHERE member_id =%s AND paymentStatus =%s"
+				  , (booking.attractionId, booking.date, booking.time, booking.price, datetime.now(), member.member_id, 'unpaid'))
 		else: 
-			cursor.execute("INSERT INTO tp_order(member_id, attractionId, tourDate, dateTime, price, created_at) VALUES(%s, %s, %s, %s, %s, %s)"
-				  , (member_id, booking.attractionId, booking.date, booking.time, booking.price, datetime.now()))
+			cursor.execute("INSERT INTO tp_order(member_id, attractionId, tourDate, dateTime, price, created_at, paymentStatus) VALUES(%s, %s, %s, %s, %s, %s, %s)"
+				  , (member.member_id, booking.attractionId, booking.date, booking.time, booking.price, datetime.now(), 'unpaid'))
 			
 		db_connect.commit()
-		cursor.close()
-		db_connect.close()		
+		cursor.close()	
 			
 		return JSONResponse(
 			status_code = 200,
@@ -372,5 +377,74 @@ async def create_or_update_booking(booking: BookingRequest,
 				"error": True,
 				"message": "伺服器內部錯誤"
 			}
-		)	
+		)
+
+
+@app.get("/api/booking")
+async def get_booking(member: Member = Depends(get_current_member)):
+	try:
+		if member.member_id is None:
+			return JSONResponse(
+				status_code = 403,
+				content = {
+					"error": True,
+  					"message": "未登入系統，無法查詢!"
+				} 
+			)
+		else:
+			# print("[member_id ,member_name, member_email]:", member.member_id, member.member_name, member.member_email)
+			cursor = db_connect.cursor()
+			cursor.execute("SELECT attractionId, tourDate, dateTime, price FROM tp_order WHERE member_id=%s AND paymentStatus =%s", (member.member_id, 'unpaid'))
+			unpaid_booking = cursor.fetchone()
+			# print(unpaid_booking)
+			if unpaid_booking is None:
+				return JSONResponse(
+					status_code = 200,
+					content = {
+						"data": None
+					}
+				)
+			
+			attraction_id, date, time, price = unpaid_booking
+			# print(unpaid_booking)
+			attraction_id = unpaid_booking[0]
+			# print("attraction_id:", attraction_id)
+			cursor.execute("SELECT name, address, images FROM attractions WHERE id=%s", (attraction_id,))
+			attraction_data = cursor.fetchone()
+			# print(unpaid_booking_item)
+			name, address, images_str = attraction_data
+			images_list = json.loads(images_str)  
+			first_image_url = images_list[0]
+			# print(first_image_url)
+
+			response_data = {
+				"data": {
+					"attraction": {
+						"id": attraction_id,
+						"name": name,
+						"address": address,
+						"image": first_image_url
+					},
+					"date": date.strftime('%Y-%m-%d'),
+					"time": time,
+					"price": price
+				}
+			}
+			# print(response_data)
+
+			return JSONResponse(
+				status_code = 200,
+				content =response_data
+			)
+	except:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤"
+			}
+		)
+
+
+
 

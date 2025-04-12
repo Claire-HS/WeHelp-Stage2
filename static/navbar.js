@@ -167,7 +167,7 @@ document.getElementById("sign-in").addEventListener("submit", async function(eve
           dialog.close();
           window.location.reload();
           // window.location.href = "/";
-        }, 3000);
+        }, 1000);
 
       } else {
         loginMessage.innerHTML = result.message || "發生未知錯誤";
@@ -199,10 +199,7 @@ async function checkUserStatus() {
       if (result.data) {
         logoutBtn.style.display = "block";
         return true;
-        // loginBtn.style.display = "none";
       } else {
-        // Token 無效或已過期
-        // logoutBtn.style.display = "none";
         loginBtn.style.display = "block";
         localStorage.removeItem("jwt_token");
         return false;
