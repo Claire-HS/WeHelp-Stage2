@@ -9,6 +9,7 @@
   <script src="/static/navbar.js" defer></script>
 </head>
 <body class="page-booking">
+<div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;"></div>
   <dialog class="dialog" id="dialog">
     <div class="login-container" id="login-container">
     <div class="close-btn" id="close-btn-login">
@@ -298,6 +299,7 @@
     } else { 
       await getUnpaidBooking();
       inputText();
+      document.getElementById("loading-screen").style.display = "none";
     }
   });
 
