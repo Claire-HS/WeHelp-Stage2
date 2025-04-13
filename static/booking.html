@@ -68,92 +68,97 @@
       </div>
     </div>
   </div>
-  <div class="bookingPage-title">
-    <p>您好，<span id="memberName"></span>，待預訂的行程如下：</p>
-  </div>
-  <div class="section" id="bookingSection"> 
-    <div class="order-item">
-      <div class="item-pic">
-        <img src="" alt="景點照片">
+  <div class="container-booking">
+    <div class="bookingPage-title">
+      <p>您好，<span id="memberName"></span>，待預訂的行程如下：</p>
+    </div>
+    <div class="section" id="bookingSection"> 
+      <div class="order-item">
+        <div class="item-pic">
+          <img src="" alt="景點照片">
+        </div>
+        <div class="item-info">
+          <p class="order-item-title">台北一日遊： <span id="itemName"></span></p>
+          <p>日期：<span id="itemDate"></span></p>
+          <p>時間：<span id="itemTime"></span></p>
+          <p>費用：<span>新台幣<span id="itemExp"></span> 元</span></p>
+          <p class="location">
+            <span class="label">地點：</span>
+            <span id="itemAddress"></span>
+          </p>
+          <div class="del-btn" id="del-btn">
+            <img src="/static/icon/icon_delete.png" alt="項目刪除" width="30px" height="30px">
+          </div>
+        </div>
       </div>
-      <div class="item-info">
-        <p class="order-item-title">台北一日遊： <span id="itemName"></span></p>
-        <p>日期：<span id="itemDate"></span></p>
-        <p>時間：<span id="itemTime"></span></p>
-        <p>費用：<span>新台幣<span id="itemExp"></span> 元</span></p>
-        <p>地點：<span id="itemAddress"></span></p>
-        <div class="del-btn" id="del-btn">
-          <img src="/static/icon/icon_delete.png" alt="項目刪除" width="30px" height="30px">
-        </div>
+      <div class="hr-rwd"><hr></div>
+      <div class="contact-info">
+        <p>您的聯絡資訊</p>
+        <form>
+          <div>
+            <label for="contactName">聯絡姓名：</label>
+            <input type="text" name="contactName" id="contactName" 
+                    pattern="^\S.*\S$"
+                    title="姓名前後不可包含空格"
+                    required>
+          </div>
+          <div>       
+            <label for="contactMail">連絡信箱：</label>
+            <input type="email" name="contactMail" id="contactMail"
+                    pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
+                    title="請輸入有效的電子信箱格式"
+                    required>
+          </div>
+          <div>      
+            <label for="contactMobile">手機號碼：</label>
+            <input type="tel" name="contactMobile" id="contactMobile" 
+                    inputmode="numeric"
+                    required>
+          </div>         
+        </form>
+        <p class="addition-text">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</p>
       </div>
-    </div>
-    <hr>
-    <div class="contact-info">
-      <p>您的聯絡資訊</p>
-      <form>
-        <div>
-          <label for="contactName">聯絡姓名：</label>
-          <input type="text" name="contactName" id="contactName" 
-                  pattern="^\S.*\S$"
-                  title="姓名前後不可包含空格"
-                  required>
-        </div>
-        <div>       
-          <label for="contactMail">連絡信箱：</label>
-          <input type="email" name="contactMail" id="contactMail"
-                  pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
-                  title="請輸入有效的電子信箱格式"
-                  required>
-        </div>
-        <div>      
-          <label for="contactMobile">手機號碼：</label>
-          <input type="tel" name="contactMobile" id="contactMobile" 
-                  inputmode="numeric"
-                  required>
-        </div>         
-      </form>
-      <p class="addition-text">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</p>
-    </div>
-    <hr>
-    <div class="payment-info">
-      <p>信用卡付款資訊</p>
-      <form>
-        <div>
-          <label for="cardNo">卡片號碼：</label>
-          <input type="text" name="cardNo" id="cardNo" 
-                  placeholder="**** **** **** ****"
-                  maxlength="19"
-                  pattern="(?:\d{4} ){3}\d{4}"
-                  inputmode="numeric"
-                  autocomplete="cc-number" 
-                  title="請輸入 16 位數的卡號"
-                  required>
-        </div>
-        <div>       
-          <label for="expiryDate">過期時間：</label>
-          <input type="email" name="expiryDate" id="expiryDate"
-                  placeholder="MM / YY" 
-                  maxlength="5" 
-                  pattern="^(0[1-9]|1[0-2])\/\d{2}$"
-                  inputmode="numeric"
-                  title="請輸入有效的月份"
-                  required>
-        </div>
-        <div>      
-          <label for="cvv">驗證密碼：</label>
-          <input type="text" name="cvv" id="cvv" 
-                  placeholder="CVV"
-                  maxlength="3"
-                  pattern="\d{3}"
-                  inputmode="numeric"
-                  required>
-        </div>         
-      </form>
-    </div>
-    <hr>
-    <div class="order-confirm">
-        <p>總價：新台幣&nbsp;<span id="totalAmount"></span>&nbsp;元</p>
-        <button id="order-submit">確認訂購並付款</button>
+      <div class="hr-rwd"><hr></div>
+      <div class="payment-info">
+        <p>信用卡付款資訊</p>
+        <form>
+          <div>
+            <label for="cardNo">卡片號碼：</label>
+            <input type="text" name="cardNo" id="cardNo" 
+                    placeholder="**** **** **** ****"
+                    maxlength="19"
+                    pattern="(?:\d{4} ){3}\d{4}"
+                    inputmode="numeric"
+                    autocomplete="cc-number" 
+                    title="請輸入 16 位數的卡號"
+                    required>
+          </div>
+          <div>       
+            <label for="expiryDate">過期時間：</label>
+            <input type="email" name="expiryDate" id="expiryDate"
+                    placeholder="MM / YY" 
+                    maxlength="5" 
+                    pattern="^(0[1-9]|1[0-2])\/\d{2}$"
+                    inputmode="numeric"
+                    title="請輸入有效的月份"
+                    required>
+          </div>
+          <div>      
+            <label for="cvv">驗證密碼：</label>
+            <input type="text" name="cvv" id="cvv" 
+                    placeholder="CVV"
+                    maxlength="3"
+                    pattern="\d{3}"
+                    inputmode="numeric"
+                    required>
+          </div>         
+        </form>
+      </div>
+      <div class="hr-rwd"><hr></div>
+      <div class="order-confirm">
+          <p>總價：新台幣&nbsp;<span id="totalAmount"></span>&nbsp;元</p>
+          <button id="order-submit">確認訂購並付款</button>
+      </div>
     </div>
   </div>
   <div class="footer" id="footer">

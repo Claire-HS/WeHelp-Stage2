@@ -381,11 +381,9 @@ async def get_booking(member: Member = Depends(get_current_member)):
 				} 
 			)
 		else:
-			# print("[member_id ,member_name, member_email]:", member.member_id, member.member_name, member.member_email)
 			cursor = db_connect.cursor()
 			cursor.execute("SELECT attractionId, tourDate, dateTime, price FROM tp_order WHERE member_id=%s AND paymentStatus =%s", (member.member_id, 'unpaid'))
 			unpaid_booking = cursor.fetchone()
-			# print(unpaid_booking)
 			if unpaid_booking is None:
 				return JSONResponse(
 					status_code = 200,
@@ -395,16 +393,12 @@ async def get_booking(member: Member = Depends(get_current_member)):
 				)
 			
 			attraction_id, date, time, price = unpaid_booking
-			# print(unpaid_booking)
 			attraction_id = unpaid_booking[0]
-			# print("attraction_id:", attraction_id)
 			cursor.execute("SELECT name, address, images FROM attractions WHERE id=%s", (attraction_id,))
 			attraction_data = cursor.fetchone()
-			# print(unpaid_booking_item)
 			name, address, images_str = attraction_data
 			images_list = json.loads(images_str)  
 			first_image_url = images_list[0]
-			# print(first_image_url)
 
 			response_data = {
 				"data": {
@@ -419,7 +413,6 @@ async def get_booking(member: Member = Depends(get_current_member)):
 					"price": price
 				}
 			}
-			# print(response_data)
 
 			return JSONResponse(
 				status_code = 200,
