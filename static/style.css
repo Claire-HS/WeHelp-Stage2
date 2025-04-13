@@ -958,6 +958,12 @@ hr {
     height: 200px;
 }
 
+.item-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .item-info {
     width: 700px;
     height: 170px;
@@ -1003,6 +1009,7 @@ hr {
     position: absolute;
     top: 0px;
     right: 0px;
+    cursor: pointer;
 }
 
 .contact-info {
@@ -1163,6 +1170,10 @@ hr {
     justify-content: center;
     position: relative; 
     bottom: 0;
+}
+
+.contact-info input.filled, .payment-info input.filled {
+  color: #000000;
 }
 
 

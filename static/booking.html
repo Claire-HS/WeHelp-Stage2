@@ -73,14 +73,16 @@
   </div>
   <div class="section" id="bookingSection"> 
     <div class="order-item">
-      <div class="item-pic"></div>
+      <div class="item-pic">
+        <img src="" alt="景點照片">
+      </div>
       <div class="item-info">
         <p class="order-item-title">台北一日遊： <span id="itemName"></span></p>
         <p>日期：<span id="itemDate"></span></p>
         <p>時間：<span id="itemTime"></span></p>
-        <p>費用：<span id="itemExp"></span></p>
+        <p>費用：<span>新台幣<span id="itemExp"></span> 元</span></p>
         <p>地點：<span id="itemAddress"></span></p>
-        <div class="del-btn">
+        <div class="del-btn" id="del-btn">
           <img src="/static/icon/icon_delete.png" alt="項目刪除" width="30px" height="30px">
         </div>
       </div>
@@ -130,7 +132,7 @@
         <div>       
           <label for="expiryDate">過期時間：</label>
           <input type="email" name="expiryDate" id="expiryDate"
-                  placeholder="MM/YY" 
+                  placeholder="MM / YY" 
                   maxlength="5" 
                   pattern="^(0[1-9]|1[0-2])\/\d{2}$"
                   inputmode="numeric"
@@ -150,7 +152,7 @@
     </div>
     <hr>
     <div class="order-confirm">
-        <p>總價：新台幣 <span id="totalAmount"></span> 元</p>
+        <p>總價：新台幣&nbsp;<span id="totalAmount"></span>&nbsp;元</p>
         <button id="order-submit">確認訂購並付款</button>
     </div>
   </div>
@@ -161,6 +163,7 @@
 </body>
 <script>
 
+  // 取得預約資料
   async function getUnpaidBooking() {
     const token = localStorage.getItem("jwt_token");
 
@@ -173,32 +176,28 @@
       });
       
       let result = await response.json();
-      // console.log(result);
-      
+
       let payload = token.split('.')[1]; 
       let decoded = JSON.parse(atob(payload));
       let userName = decoded.member_name; 
+      let userEmail = decoded.member_email;
       let memberName = document.getElementById("memberName");
+      let contactName = document.getElementById("contactName");
+      let contactMail = document.getElementById("contactMail");
       memberName.innerText = userName;
+      contactName.value = userName;
+      contactMail.value = userEmail;
 
       if (result.data === null) {
-        let bookingSection = document.getElementById("bookingSection");
-        bookingSection.innerHTML = "";
-        let message = document.createElement("div");
-        message.textContent = "目前沒有任何待預訂的行程";
-        message.className = "null-message";
-        bookingSection.appendChild(message);
-
-        let footer = document.getElementById("footer");
-        footer.style.height = "865px";
-        footer.style.alignItems = "flex-start";
-
+        noneBooking();
       } else {
         let itemName = document.getElementById("itemName");
+        let itemPic = document.querySelector(".item-pic img");
         let itemDate = document.getElementById("itemDate");
         let itemTime = document.getElementById("itemTime");
         let itemExp = document.getElementById("itemExp");
         let itemAddress = document.getElementById("itemAddress");
+        let totalAmount = document.getElementById("totalAmount");
 
         let attraction = result.data.attraction;
         let name = attraction.name;
@@ -207,46 +206,93 @@
 
         let date = result.data.date;
         let time = result.data.time;
+        let timeText = "";
         let price = result.data.price;
 
-        
+        if (time === "morning") {
+          timeText = "早上 9 點到下午 4 點"
+        } else {
+          timeText = "下午 2 點到晚上 9 點"
+        }
 
         itemName.innerText = name;
+        itemPic.src = imageUrl;
         itemDate.innerText = date;
-        itemTime.innerText = time;
-        itemExp.innerText = price;
+        itemTime.innerText = timeText;
+        itemExp.innerText = Number(price).toLocaleString();
         itemAddress.innerText = address;
-
-
-
+        totalAmount.innerText = Number(price).toLocaleString();
       }
-
-
-
-
-
-    }
-    catch(e){
-      
+    } catch(error) {
+      console.error("錯誤:", error);
     }
   };
 
-  document.addEventListener("DOMContentLoaded", function() {
-     getUnpaidBooking()
-});
+  // input文字顏色
+  function inputText() {
+    let inputs = document.querySelectorAll("input");
 
- 
- 
+    inputs.forEach(input => {
+      if (input.value.trim() !== "") {
+        input.classList.add("filled");
+      }
 
+      input.addEventListener("input", function() {
+        if (input.value.trim() !== "") {
+          input.classList.add("filled");
+        } else {
+          this.classList.remove("filled");
+        }
+      });
+    });
+  };
 
+  // 無預約
+  function noneBooking() {
+    let bookingSection = document.getElementById("bookingSection");
+    bookingSection.innerHTML = "";
+    let message = document.createElement("div");
+    message.textContent = "目前沒有任何待預訂的行程";
+    message.className = "null-message";
+    bookingSection.appendChild(message);
 
+    let footer = document.getElementById("footer");
+    footer.style.height = "865px";
+    footer.style.alignItems = "flex-start";
+  };
 
+  async function delBooking() {
+    const token = localStorage.getItem("jwt_token");
+
+    try {
+      let response = await fetch("/api/booking", {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      let result = await response.json();
+
+      if (response.ok && result.ok) {
+        window.location.reload();
+      } else {
+        console.error("無效操作：", result.message);
+        alert("無效操作：" + result.message);
+      }
+    } catch (error) {
+      console.error("錯誤：", error);
+    }
+  };
 
 
   document.addEventListener("DOMContentLoaded", async function() {
     const isLoggedIn = await checkUserStatus();
     if (!isLoggedIn) {
       window.location.href = "/";
+    } else { 
+      await getUnpaidBooking();
+      inputText();
     }
   });
 
@@ -270,6 +316,13 @@
       this.value = value;
     }
   });
+
+  const delBtn = document.getElementById("del-btn");
+  delBtn.addEventListener("click", delBooking);
+
+
+
+
 
 
 </script>

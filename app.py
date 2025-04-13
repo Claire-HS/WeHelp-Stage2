@@ -52,8 +52,6 @@ class BookingRequest(BaseModel):
     price: int
 
 class Member(BaseModel):
-	# member_name: str
-	# member_email: str
 	member_id: int
 
 
@@ -299,20 +297,11 @@ async def get_user_info(token: HTTPAuthorizationCredentials = Depends(bearer_sch
 		return {"data": None}
 
 
-# def get_current_member_id(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
-# 	try:
-# 		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
-# 		return decoded_token.get("member_id")
-# 	except Exception:
-# 		raise HTTPException(status_code=401, detail="無效的憑證")
-
 def get_current_member(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> Member:
 	try:
 		decoded_token = jwt.decode(token.credentials, secret_key, algorithms=["HS256"])
 		return Member(
 			member_id = decoded_token.get("member_id"),
-			# member_name = decoded_token.get("member_name"),
-			# member_email = decoded_token.get("member_email")
 		)
 	except Exception:
 		raise HTTPException(status_code=401, detail="無效的憑證") 
@@ -445,6 +434,36 @@ async def get_booking(member: Member = Depends(get_current_member)):
 			}
 		)
 
-
+@app.delete("/api/booking")
+async def del_booking(member: Member = Depends(get_current_member)):
+	try:
+		if member.member_id is None:
+			return JSONResponse(
+				status_code = 403,
+				content = {
+					"error": True,
+  					"message": "未登入系統，無效操作!"
+				} 
+			)
+		else:
+			cursor = db_connect.cursor()
+			cursor.execute("DELETE FROM tp_order WHERE member_id=%s AND paymentStatus =%s", (member.member_id, 'unpaid'))
+			db_connect.commit()
+			cursor.close()
+			
+			return JSONResponse(
+				status_code = 200,
+				content = {
+					"ok": True
+				} 
+			)	
+	except:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤"
+			}
+		)
 
 
