@@ -1,10 +1,12 @@
 const dialog = document.getElementById("dialog")
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const closeBtn = document.getElementById("close-btn");
+const closeBtnLogin = document.getElementById("close-btn-login");
+const closeBtnRegister = document.getElementById("close-btn-register");
 const signIn = document.getElementById("login-container");
 const signUp = document.getElementById("register-container");
 const navList = document.getElementById("navList");
+const bookingBtn = document.getElementById("bookingBtn");
   // navList.style.display = "none";
 
 // 開啟/關閉 Dialog
@@ -19,9 +21,26 @@ loginBtn.addEventListener("click", () => {
     setDialogHeight(275);
 });
 
-closeBtn.addEventListener("click", () =>{
+closeBtnLogin.addEventListener("click", () =>{
     dialog.close();         
-})
+});
+
+closeBtnRegister.addEventListener("click", () => {
+      dialog.close();         
+});
+
+bookingBtn.addEventListener("click", async () => {
+  const isLoggedIn = await checkUserStatus();
+
+  if (isLoggedIn) {
+    window.location.href = "/booking";
+  } else {
+    dialog.showModal();
+    signUp.style.display = "none";
+    signIn.style.display = "flex";
+    setDialogHeight(275);
+  }
+});
 
 //切換Dialog signIn/Up
 document.getElementById("switch-to-register").addEventListener("click", function(event){
@@ -137,7 +156,7 @@ document.getElementById("sign-in").addEventListener("submit", async function(eve
         loginMessage.classList.add("success");
 
         // 手動關閉
-        closeBtn.onclick = () => {
+        closeBtnLogin.onclick = () => {
           dialog.close();
           window.location.reload();
           // window.location.href = "/";
@@ -148,7 +167,7 @@ document.getElementById("sign-in").addEventListener("submit", async function(eve
           dialog.close();
           window.location.reload();
           // window.location.href = "/";
-        }, 3000);
+        }, 1000);
 
       } else {
         loginMessage.innerHTML = result.message || "發生未知錯誤";
@@ -179,15 +198,15 @@ async function checkUserStatus() {
 
       if (result.data) {
         logoutBtn.style.display = "block";
-        // loginBtn.style.display = "none";
+        return true;
       } else {
-        // Token 無效或已過期
-        // logoutBtn.style.display = "none";
         loginBtn.style.display = "block";
         localStorage.removeItem("jwt_token");
+        return false;
       }
     } catch (error) {
-    console.error("錯誤:", error);
+      console.error("錯誤:", error);
+      return false;
     } finally {
       navList.style.display = "flex";
     }
