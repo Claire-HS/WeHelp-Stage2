@@ -611,7 +611,7 @@ async def create_order(data: OrderRequest,
 			msg_text = None
 			if payment_result["status"] == 0:
 				cursor.execute("UPDATE tp_order SET paymentStatus=%s, paid_at=%s WHERE order_number=%s", (payment_status, formatted_paid_at ,payment_result["order_number"]))
-				msg_text = "付款成功"
+				msg_text = "付款成功!"
 			else:
 				msg_text = "付款失敗： "+ payment_result["msg"]
 

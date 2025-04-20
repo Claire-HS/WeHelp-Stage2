@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
   <script src="/static/navbar.js" defer></script>
 </head>
-<body>
+<body class="page-thankyou">
   <dialog class="dialog" id="dialog">
     <div class="login-container" id="login-container">
     <div class="close-btn" id="close-btn-login">
@@ -68,19 +68,52 @@
       </div>
     </div>
   </div>
-  <div class="container-booking">
-    
+  <div class="container-thankyou">
+    <div class="thankyou-title">
+      <p>行程預定成功！</p>
+      <p>您的訂單資訊如下</p>
+    </div>
+    <div class="oreder-info">
+      <p>訂單編號：<span id="orderNo"></span></p>
+      <p>付款狀態：<span id="orderStatus"></span></p>
+    </div>
+    <div class="moreInfo">
+      <p>請記住此訂單號碼，以利日後查詢或聯絡客服。</p>
+    </div>
+
+
+  </div> 
   <div class="footer" id="footer">
     <p>COPYRIGHT © 2021 台北一日遊</p>
   </div>
   
 </body>
 <script>
+
+const status = sessionStorage.getItem("paymentStatus");
+const params = new URLSearchParams(window.location.search);
+const number = params.get("number");
+const orderStatus = document.getElementById("orderStatus");
+const orderNo = document.getElementById("orderNo");
+
+
 document.addEventListener("DOMContentLoaded", async function() {
     const isLoggedIn = await checkUserStatus();
     if (!isLoggedIn) {
       window.location.href = "/";
-    } else { }})
+    } else { 
+      orderNo.innerText = number;
+
+      if (status === "0") {
+        orderStatus.innerText = "付款成功";
+        orderStatus.style.color = "#08bb32";
+      } else {
+        orderStatus.innerText = "付款失敗，請聯繫客服處理！";
+        orderStatus.style.color = "#d12b3c";
+      }
+
+    }
+  })
 
 
 </script>

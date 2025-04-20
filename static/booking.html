@@ -124,38 +124,17 @@
       <div class="payment-info">
         <p>信用卡付款資訊</p>
         <form>
-          <div>
-            <!-- <label for="cardNo">卡片號碼：</label> -->
+          <div class="form-group">
+            <label for="card-number">卡片號碼：</label>
             <div class="tpfield" id="card-number"></div>
-            <!-- <input type="text" name="cardNo" id="cardNo" 
-                    placeholder="**** **** **** ****"
-                    maxlength="19"
-                    pattern="(?:\d{4} ){3}\d{4}"
-                    inputmode="numeric"
-                    autocomplete="cc-number" 
-                    title="請輸入 16 位數的卡號"
-                    required> -->
           </div>
-          <div>       
-            <!-- <label for="expiryDate">過期時間：</label> -->
+          <div class="form-group">       
+            <label for="card-expiration-date">過期時間：</label>
             <div class="tpfield" id="card-expiration-date"></div>
-            <!-- <input type="email" name="expiryDate" id="expiryDate"
-                    placeholder="MM / YY" 
-                    maxlength="5" 
-                    pattern="^(0[1-9]|1[0-2])\/\d{2}$"
-                    inputmode="numeric"
-                    title="請輸入有效的月份"
-                    required> -->
           </div>
-          <div>      
-            <!-- <label for="cvv">驗證密碼：</label> -->
+          <div class="form-group">      
+            <label for="card-ccv">驗證密碼：</label>
             <div class="tpfield" id="card-ccv"></div>
-            <!-- <input type="text" name="cvv" id="cvv" 
-                    placeholder="CVV"
-                    maxlength="3"
-                    pattern="\d{3}"
-                    inputmode="numeric"
-                    required> -->
           </div>         
         </form>
       </div>
@@ -346,10 +325,10 @@
         },
         styles: {
           "input": {
-            "color": "#757575",
-            "font-size": "16px",
-            "font-weight": "500px",
-            "line-height": "13.3px"
+              "color": "#757575",
+              "font-size": "16px",
+              "font-weight": "500",
+              "line-height": "13.3px"
           },
           ":focus": {
             "color": "black"
@@ -387,20 +366,6 @@
       submitBtn.setAttribute("disabled", true)
         // Disable submit Button to get prime.
     }
-
-    // if (update.status.number === 2) {
-    //   showCardNumberError()
-    // } else if (update.status.number === 0) {
-    //   showCardNumberValid()
-    // }
-
-    // if (update.status.expiry === 2) {
-    //   showExpiryError()
-    // }
-
-    // if (update.status.ccv === 0) {
-    //   showCCVSuccess()
-    // }
   })
 
   document.getElementById("order-submit").addEventListener("click", async function(event) {
@@ -428,7 +393,6 @@
 
       try {
         const prime = result.card.prime;
-        // alert('取得 Prime 成功：' + prime);
         const totalAmountText = document.getElementById("totalAmount").innerText;
         const totalAmount = parseInt(totalAmountText.replace(/,/g, ""));
         const contactMobile = document.getElementById("contactMobile").value.trim();
@@ -458,8 +422,6 @@
             "contact": contact
           }
         }
-
-        // console.log(requestBody);
         
         let response = await fetch("/api/orders", {
           method: "POST",
@@ -473,7 +435,8 @@
         let bookingResult = await response.json();
 
         if (response.status === 200) {
-          alert(bookingResult.data.payment.message + "\n訂單編號：" + bookingResult.data.number);
+          sessionStorage.setItem("paymentStatus", bookingResult.data.payment.status);
+          alert(bookingResult.data.payment.message);
           window.location.href = `/thankyou?number=${bookingResult.data.number}`;
         } else if (response.status === 400) {
           alert("錯誤訊息：" + bookingResult.message);
@@ -494,42 +457,6 @@
 
 
   });
-
-
-// async function doSomething() {
-//   const result = await getUnpaidBooking();
-
-//   if (result) {
-//     console.log("unpaidBookingData:", result.unpaidBookingData);
-//     console.log("contactData:", result.contactData);
-//   }
-// }
-
-// doSomething();
-
-
-// const cardInput = document.getElementById("cardNo");
-// const expiryInput = document.getElementById("expiryDate");
-
-// 信用卡輸入處理
-// 卡號格式
-// cardInput.addEventListener("input", function () {
-//   let value = this.value.replace(/\D/g, '');
-//   value = value.slice(0, 16);
-//   this.value = value.replace(/(.{4})/g, '$1 ').trim(); // 每4位數1空格+去掉最後1個空格
-// });
-
-// 效期格式
-// expiryInput.addEventListener("input", function () {
-//   let value = this.value.replace(/\D/g, '').slice(0, 4);
-//   if (value.length >= 3) {
-//     this.value = value.slice(0, 2) + '/' + value.slice(2);
-//   } else {
-//     this.value = value;
-//   }
-// });
-
-
 
 </script>
 
