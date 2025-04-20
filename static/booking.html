@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
   <script src="/static/navbar.js" defer></script>
+  <script src="https://js.tappaysdk.com/sdk/tpdirect/v5.14.0"></script>
 </head>
 <body class="page-booking">
 <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999;"></div>
@@ -123,42 +124,24 @@
       <div class="payment-info">
         <p>信用卡付款資訊</p>
         <form>
-          <div>
-            <label for="cardNo">卡片號碼：</label>
-            <input type="text" name="cardNo" id="cardNo" 
-                    placeholder="**** **** **** ****"
-                    maxlength="19"
-                    pattern="(?:\d{4} ){3}\d{4}"
-                    inputmode="numeric"
-                    autocomplete="cc-number" 
-                    title="請輸入 16 位數的卡號"
-                    required>
+          <div class="form-group">
+            <label for="card-number">卡片號碼：</label>
+            <div class="tpfield" id="card-number"></div>
           </div>
-          <div>       
-            <label for="expiryDate">過期時間：</label>
-            <input type="email" name="expiryDate" id="expiryDate"
-                    placeholder="MM / YY" 
-                    maxlength="5" 
-                    pattern="^(0[1-9]|1[0-2])\/\d{2}$"
-                    inputmode="numeric"
-                    title="請輸入有效的月份"
-                    required>
+          <div class="form-group">       
+            <label for="card-expiration-date">過期時間：</label>
+            <div class="tpfield" id="card-expiration-date"></div>
           </div>
-          <div>      
-            <label for="cvv">驗證密碼：</label>
-            <input type="text" name="cvv" id="cvv" 
-                    placeholder="CVV"
-                    maxlength="3"
-                    pattern="\d{3}"
-                    inputmode="numeric"
-                    required>
+          <div class="form-group">      
+            <label for="card-ccv">驗證密碼：</label>
+            <div class="tpfield" id="card-ccv"></div>
           </div>         
         </form>
       </div>
       <div class="hr-rwd"><hr></div>
       <div class="order-confirm">
           <p>總價：新台幣&nbsp;<span id="totalAmount"></span>&nbsp;元</p>
-          <button id="order-submit">確認訂購並付款</button>
+          <button id="order-submit" disabled>確認訂購並付款</button>
       </div>
     </div>
   </div>
@@ -194,8 +177,14 @@
       contactName.value = userName;
       contactMail.value = userEmail;
 
+      const contactData = {
+        name: userName,
+        email: userEmail,
+      }
+
       if (result.data === null) {
         noneBooking();
+        return null;
       } else {
         let itemName = document.getElementById("itemName");
         let itemPic = document.querySelector(".item-pic img");
@@ -206,6 +195,7 @@
         let totalAmount = document.getElementById("totalAmount");
 
         let attraction = result.data.attraction;
+        let id = attraction.id;
         let name = attraction.name;
         let address = attraction.address;
         let imageUrl = attraction.image;
@@ -228,11 +218,26 @@
         itemExp.innerText = Number(price).toLocaleString();
         itemAddress.innerText = address;
         totalAmount.innerText = Number(price).toLocaleString();
-      }
+
+        const unpaidBookingData = {
+          id: id,
+          name: name,
+          address: address,
+          image: imageUrl,
+          date: date,
+          time: time,
+        };
+
+        return {
+          unpaidBookingData,
+          contactData
+        };
+      }  
     } catch(error) {
       console.error("錯誤:", error);
     }
-  };
+  }
+
 
   // input文字顏色
   function inputText() {
@@ -265,7 +270,7 @@
     let footer = document.getElementById("footer");
     footer.style.height = "865px";
     footer.style.alignItems = "flex-start";
-  };
+  }
 
   async function delBooking() {
     const token = localStorage.getItem("jwt_token");
@@ -289,7 +294,7 @@
     } catch (error) {
       console.error("錯誤：", error);
     }
-  };
+  }
 
 
   document.addEventListener("DOMContentLoaded", async function() {
@@ -299,38 +304,159 @@
     } else { 
       await getUnpaidBooking();
       inputText();
+
+      TPDirect.setupSDK(159810, 'app_hH8HSuz5aXbuxUrmYaQVVaausdCz9u0NnVFpHQT4qZHg4iBiNb2FhRqIT1LK', 'sandbox');
+      
+      // 初始化 TapPay 的信用卡欄位
+      TPDirect.card.setup({
+        fields: {
+          number: {
+            element: "#card-number",
+            placeholder: "**** **** **** ****"
+          },
+          expirationDate: {
+            element: "#card-expiration-date",
+            placeholder: "MM / YY"
+          },
+          ccv: {
+            element: "#card-ccv",
+            placeholder: "ccv"
+          }
+        },
+        styles: {
+          "input": {
+              "color": "#757575",
+              "font-size": "16px",
+              "font-weight": "500",
+              "line-height": "13.3px"
+          },
+          ":focus": {
+            "color": "black"
+          },
+          ".valid": {
+            "color": "green"
+          },
+          ".invalid": {
+            "color": "red"
+          }
+        },
+        isMaskCreditCardNumber: true,
+        maskCreditCardNumberRange: {
+            beginIndex: 6,
+            endIndex: 11
+        }
+      });
+
+      // 隱藏 loading 畫面
       document.getElementById("loading-screen").style.display = "none";
-    }
-  });
-
-  const cardInput = document.getElementById("cardNo");
-  const expiryInput = document.getElementById("expiryDate");
-
-  // 信用卡輸入處理
-  // 卡號格式
-  cardInput.addEventListener("input", function () {
-    let value = this.value.replace(/\D/g, '');
-    value = value.slice(0, 16);
-    this.value = value.replace(/(.{4})/g, '$1 ').trim(); // 每4位數1空格+去掉最後1個空格
-  });
-
-  // 效期格式
-  expiryInput.addEventListener("input", function () {
-    let value = this.value.replace(/\D/g, '').slice(0, 4);
-    if (value.length >= 3) {
-      this.value = value.slice(0, 2) + '/' + value.slice(2);
-    } else {
-      this.value = value;
     }
   });
 
   const delBtn = document.getElementById("del-btn");
   delBtn.addEventListener("click", delBooking);
 
+  
+  TPDirect.card.onUpdate(function(update) {
+    const submitBtn = document.getElementById("order-submit");
+
+    if (update.canGetPrime) {
+      submitBtn.removeAttribute("disabled")
+        // Enable submit Button to get prime.
+    } else {
+      submitBtn.setAttribute("disabled", true)
+        // Disable submit Button to get prime.
+    }
+  })
+
+  document.getElementById("order-submit").addEventListener("click", async function(event) {
+    event.preventDefault();
+
+    const token = localStorage.getItem("jwt_token");
+    const tappayStatus = TPDirect.card.getTappayFieldsStatus();
+    const data = await getUnpaidBooking();
+
+    if (data === null ) {
+      alert("沒有未付款的訂單");
+      return;
+    }
+
+    if (!tappayStatus.canGetPrime) {
+      alert("信用卡資訊有誤，請檢查欄位");
+      return;
+    }
+
+    TPDirect.card.getPrime(async function (result) {
+      if (result.status !== 0) {
+        alert("取得 Prime 失敗：" + result.msg);
+        return;
+      }
+
+      try {
+        const prime = result.card.prime;
+        const totalAmountText = document.getElementById("totalAmount").innerText;
+        const totalAmount = parseInt(totalAmountText.replace(/,/g, ""));
+        const contactMobile = document.getElementById("contactMobile").value.trim();
+
+        const attraction = {
+          "id": data.unpaidBookingData.id,
+          "name": data.unpaidBookingData.name,
+          "address": data.unpaidBookingData.address,
+          "image": data.unpaidBookingData.image
+        };
+
+        const contact = {
+          "name": data.contactData.name,
+          "email": data.contactData.email,
+          "phone": contactMobile
+        }
+
+        const requestBody = {
+          "prime": prime,
+          "order": {
+            "price": totalAmount,
+            "trip": {
+              "attraction": attraction,
+              "date": data.unpaidBookingData.date,
+              "time": data.unpaidBookingData.time
+            },
+            "contact": contact
+          }
+        }
+        
+        let response = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        let bookingResult = await response.json();
+
+        if (response.status === 200) {
+          sessionStorage.setItem("paymentStatus", bookingResult.data.payment.status);
+          alert(bookingResult.data.payment.message);
+          window.location.href = `/thankyou?number=${bookingResult.data.number}`;
+        } else if (response.status === 400) {
+          alert("錯誤訊息：" + bookingResult.message);
+        } else if (response.status === 403) {
+          alert("錯誤訊息：" + bookingResult.message);
+          window.location.href = "/";
+        } else if (response.status === 500) {
+          alert("錯誤訊息：" + bookingResult.message);
+        } else {
+          alert("發生未知錯誤：" + bookingResult.message);
+        }
+      } catch (error) {
+        console.error("請求失敗：", error);
+        alert("網路錯誤，請檢查連線或稍後再試");
+      }
+    })
 
 
 
-
+  });
 
 </script>
 
