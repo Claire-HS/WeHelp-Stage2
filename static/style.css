@@ -1128,7 +1128,7 @@ input[type="radio"]:checked::before{
     justify-content: center; 
 }
 
-.payment-info input, .contact-info input {
+.contact-info input {
     width: 200px;
     height: 38px;
     border-radius: 5px;
@@ -1216,7 +1216,18 @@ input[type="radio"]:checked::before{
   color: #000000;
 }
 
-
+.tpfield {
+    width: 200px;
+    height: 38px;
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid #E8E8E8;
+    background-color: #FFFFFF;
+    /* font-size: 16px;
+    font-weight: 500;
+    line-height: 13.3px;
+    color: #757575; */
+}
 
 
 

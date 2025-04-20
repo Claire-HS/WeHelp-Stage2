@@ -4,8 +4,85 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thank You</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <script src="/static/navbar.js" defer></script>
 </head>
 <body>
+  <dialog class="dialog" id="dialog">
+    <div class="login-container" id="login-container">
+    <div class="close-btn" id="close-btn-login">
+      <img src="/static/icon/icon_close.png" alt="關閉對話框" width="16px" height="16px">
+    </div>
+      <h3>登入會員帳號</h3>
+      <div>
+        <form id="sign-in">
+          <input type="email" name="email" 
+                  placeholder="輸入電子信箱" 
+                  pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
+                  title="請輸入有效的電子信箱格式"
+                  required>
+          <input type="password" name="password" placeholder="輸入密碼" required>
+          <button type="submit">登入帳戶</button>
+          <p id="loginMessage" style="display: none"></p>
+          <p><a href="#" id="switch-to-register">還沒有帳戶？點此註冊</a></p>
+        </form>
+      </div>
+    </div>
+    <div class="register-container" id="register-container">
+    <div class="close-btn" id="close-btn-register">
+      <img src="/static/icon/icon_close.png" alt="關閉對話框" width="16px" height="16px">
+    </div>
+      <h3>註冊會員帳號</h3>
+      <div>
+        <form id="sign-up">
+          <input type="text" name="name" 
+                  placeholder="輸入姓名"
+                  pattern="^\S.*\S$"
+                  title="姓名前後不可包含空格"
+                  required>
+          <input type="email" name="email" 
+                  placeholder="輸入電子郵件" 
+                  pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}"
+                  title="請輸入有效的電子郵件格式"
+                  required>
+          <input type="password" name="password" 
+                  placeholder="輸入密碼" 
+                  pattern="^\S+$"
+                  title="密碼不可包含空格"
+                  required>
+          <button type="submit">註冊新帳戶</button>
+          <p id="registerMessage" style="display: none"></p>
+          <p><a href="#" id="switch-to-login">已經有帳戶了？點此登入</a></p>
+        </form>
+      </div>
+    </div>
+  </dialog>
+  <div class="navbar">
+    <div class="nav-text">
+      <h2><a href="/">台北一日遊</a></h2>
+      <div class="nav-list" id="navList" style="display: none">
+        <p id="bookingBtn">預定行程</p>
+        <p id="loginBtn" style="display: none">登入/註冊</p>
+        <p id="logoutBtn" style="display: none">登出系統</p>
+      </div>
+    </div>
+  </div>
+  <div class="container-booking">
+    
+  <div class="footer" id="footer">
+    <p>COPYRIGHT © 2021 台北一日遊</p>
+  </div>
   
 </body>
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    const isLoggedIn = await checkUserStatus();
+    if (!isLoggedIn) {
+      window.location.href = "/";
+    } else { }})
+
+
+</script>
+
 </html>
