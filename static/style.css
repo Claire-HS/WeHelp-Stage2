@@ -24,6 +24,11 @@ body{
     font-family: "Noto Sans TC",sans-serif;
 }
 
+.page-member {
+    padding-top: 94px; 
+    font-family: "Noto Sans TC",sans-serif;
+}
+
 .dialog{
     width: 340px;
     min-height: 275px;
@@ -181,7 +186,7 @@ body{
     z-index: 1000;
 }
 
-.page-attraction .navbar,.page-booking .navbar ,.page-thankyou .navbar{
+.page-attraction .navbar,.page-booking .navbar ,.page-thankyou .navbar, .page-member .navbar{
     border-bottom: 1px solid #E8E8E8;
 }
 
@@ -1300,6 +1305,104 @@ input[type="radio"]:checked::before{
     justify-content: center;
     position: relative; 
     bottom: 0;
+}
+
+/* member page */
+.container-account {
+    width: 1200px;
+    height: 100%;
+    margin: 20px auto 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0px 10px;
+
+}
+
+.title h1 {
+    height: 19px;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 19px;
+    color: #666666;
+}
+
+.title p {    
+    height: 16px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 16px;
+    color: #666666;
+}
+
+.account-overview {
+    width: 100%;
+    display: flex;
+    gap: 60px;
+}
+
+.orderlist {
+    flex: 7;
+}
+
+.orderlist p {
+    height: 32px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #666666;
+    border-bottom: 1px solid #E8E8E8;
+    padding-left: 10px;
+    padding-bottom: 5px;
+}
+
+
+.member-info {
+    flex: 3;
+}
+
+.member-info p {
+    height: 32px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #666666;
+    border-bottom: 1px solid #E8E8E8;
+    padding-left: 10px;
+    padding-bottom: 5px;
+}
+
+table{
+  font-family: "Noto Sans TC",sans-serif;
+  border-collapse: separate;
+  border-spacing: 0 3px;
+  margin: 0px auto 20px auto;
+}
+
+th {
+    height: 30px;
+    background-color: #448899;
+    color: white;
+    text-align: center;
+}
+
+td {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+tr:hover td{
+  background-color:#caf5f5	;
+    transition: all 0.3s ease-in-out;
 }
 
 

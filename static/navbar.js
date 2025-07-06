@@ -7,6 +7,7 @@ const signIn = document.getElementById("login-container");
 const signUp = document.getElementById("register-container");
 const navList = document.getElementById("navList");
 const bookingBtn = document.getElementById("bookingBtn");
+const memberBtn = document.getElementById("memberBtn");
   // navList.style.display = "none";
 
 // 開啟/關閉 Dialog
@@ -29,6 +30,7 @@ closeBtnRegister.addEventListener("click", () => {
       dialog.close();         
 });
 
+// 網站功能- 預訂行程、會員中心
 bookingBtn.addEventListener("click", async () => {
   const isLoggedIn = await checkUserStatus();
 
@@ -41,6 +43,19 @@ bookingBtn.addEventListener("click", async () => {
     setDialogHeight(275);
   }
 });
+
+memberBtn.addEventListener("click", async () => {
+  const isLoggedIn = await checkUserStatus();
+
+  if (isLoggedIn) {
+    window.location.href = "/member";
+  } else {
+    dialog.showModal();
+    signUp.style.display = "none";
+    signIn.style.display = "flex";
+    setDialogHeight(275);
+  }
+})
 
 //切換Dialog signIn/Up
 document.getElementById("switch-to-register").addEventListener("click", function(event){
