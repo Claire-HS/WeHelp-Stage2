@@ -1,8 +1,8 @@
 from fastapi import *
+from db import get_db
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import mysql.connector
 import json
 from collections import Counter
 from typing import Annotated
@@ -15,6 +15,9 @@ from datetime import date
 import random
 import string
 from tappay import call_tappay
+from fastapi.encoders import jsonable_encoder
+from fastapi import Depends
+import asyncio
 
 
 
@@ -23,13 +26,6 @@ from tappay import call_tappay
 app=FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-db_connect = mysql.connector.connect(
-    user="root",
-    password="Ling0424J####",
-    host="localhost",
-    database="website",
-)
 
 secret_key = "H$L511_O527%S"
 
@@ -99,15 +95,19 @@ async def booking(request: Request):
 @app.get("/thankyou", include_in_schema=False)
 async def thankyou(request: Request):
 	return FileResponse("./static/thankyou.html", media_type="text/html")
+@app.get("/member",  include_in_schema=False)
+async def member(request: Request):
+	return FileResponse("./static/member.html", media_type="text/html")
 
 
 @app.get("/api/attractions")
 async def search_pages(
     page: Annotated[int, Query(..., ge=0, description="頁碼，必填，最小值為0")],
-    keyword: str | None = Query(default=None, description="關鍵字，選填")
+    keyword: str | None = Query(default=None, description="關鍵字，選填"),
+	db=Depends(get_db)
 ):
 	try:
-		cursor = db_connect.cursor(dictionary=True)
+		cursor = db.cursor(dictionary=True)
 	
 		limit = 12 
 		offset = page * limit 
@@ -179,9 +179,10 @@ async def search_pages(
 
 
 @app.get("/api/attraction/{attractionID}")
-async def search_attractionID(request: Request, attractionID: Annotated[int,None]):
+async def search_attractionID(request: Request, attractionID: Annotated[int,None], db=Depends(get_db)
+):
 	try:
-		cursor = db_connect.cursor(dictionary=True)
+		cursor = db.cursor(dictionary=True)
 		cursor.execute("SELECT id, name, category, description, address, transport, mrt, lat, lng, images FROM attractions WHERE id = %s",(attractionID,))
 		attraction = cursor.fetchone()
 		cursor.close()
@@ -208,9 +209,10 @@ async def search_attractionID(request: Request, attractionID: Annotated[int,None
 
 
 @app.get("/api/mrts")
-async def mrt_attractions(request: Request):
+async def mrt_attractions(request: Request, db=Depends(get_db),
+):
 	try:
-		cursor = db_connect.cursor()
+		cursor = db.cursor()
 		cursor.execute("SELECT mrt FROM attractions WHERE mrt IS NOT NULL")
 		mrts = cursor.fetchall()
 		cursor.close()
@@ -233,9 +235,10 @@ async def mrt_attractions(request: Request):
 	
 
 @app.post("/api/user")
-async def signup(user: Signup):
+async def signup(user: Signup, db=Depends(get_db),
+):
 	try:
-		cursor = db_connect.cursor()
+		cursor = db.cursor()
 		cursor.execute("SELECT * FROM tp_member WHERE BINARY email=%s", (user.email,))
 		existing_user = cursor.fetchone()
 		if existing_user:
@@ -248,7 +251,7 @@ async def signup(user: Signup):
 			)
 		else:
 			cursor.execute("INSERT INTO tp_member(name, email, password) VALUES(%s, %s, %s)", (user.name, user.email, user.password))
-			db_connect.commit()
+			db.commit()
 			cursor.close()
 	except:
 		return JSONResponse(
@@ -267,9 +270,10 @@ async def signup(user: Signup):
 		)
 
 @app.put("/api/user/auth")
-async def signin(user: Signin):
+async def signin(user: Signin, db=Depends(get_db),
+):
 	try:
-		cursor = db_connect.cursor()
+		cursor = db.cursor()
 		cursor.execute("SELECT * FROM tp_member WHERE BINARY email=%s AND password=%s", (user.email, user.password))
 		member_checked = cursor.fetchone()
 		cursor.close()
@@ -339,7 +343,9 @@ def get_current_member(token: HTTPAuthorizationCredentials = Depends(bearer_sche
 
 @app.post("/api/booking")
 async def create_or_update_booking(booking: BookingRequest,
-								   member: Member = Depends(get_current_member)):
+								   member: Member = Depends(get_current_member),
+								   db=Depends(get_db)
+):
 	# 檢查登入狀態
 	try:
 		if member.member_id is None:
@@ -368,7 +374,7 @@ async def create_or_update_booking(booking: BookingRequest,
 				} 
 			)
 			
-		cursor = db_connect.cursor()
+		cursor = db.cursor()
 		# 目前限制最多一筆預約(未付款)
 		cursor.execute("SELECT * FROM tp_booking WHERE member_id = %s", (member.member_id,))
 		existing = cursor.fetchone()
@@ -381,7 +387,7 @@ async def create_or_update_booking(booking: BookingRequest,
 			cursor.execute("INSERT INTO tp_booking(member_id, attractionId, tourDate, dateTime, price, created_at) VALUES(%s, %s, %s, %s, %s, %s)"
 				  , (member.member_id, booking.attractionId, booking.date, booking.time, booking.price, now_utc()))
 			
-		db_connect.commit()
+		db.commit()
 		cursor.close()	
 			
 		return JSONResponse(
@@ -401,7 +407,7 @@ async def create_or_update_booking(booking: BookingRequest,
 
 
 @app.get("/api/booking")
-async def get_booking(member: Member = Depends(get_current_member)):
+async def get_booking(member: Member = Depends(get_current_member),db=Depends(get_db)):
 	try:
 		if member.member_id is None:
 			return JSONResponse(
@@ -412,7 +418,7 @@ async def get_booking(member: Member = Depends(get_current_member)):
 				} 
 			)
 		else:
-			cursor = db_connect.cursor()
+			cursor = db.cursor()
 			cursor.execute("SELECT attractionId, tourDate, dateTime, price FROM tp_booking WHERE member_id=%s", (member.member_id,))
 			unpaid_booking = cursor.fetchone()
 			if unpaid_booking is None:
@@ -460,7 +466,7 @@ async def get_booking(member: Member = Depends(get_current_member)):
 		)
 
 @app.delete("/api/booking")
-async def del_booking(member: Member = Depends(get_current_member)):
+async def del_booking(member: Member = Depends(get_current_member),db=Depends(get_db)):
 	try:
 		if member.member_id is None:
 			return JSONResponse(
@@ -471,9 +477,9 @@ async def del_booking(member: Member = Depends(get_current_member)):
 				} 
 			)
 		else:
-			cursor = db_connect.cursor()
+			cursor = db.cursor()
 			cursor.execute("DELETE FROM tp_booking WHERE member_id=%s", (member.member_id,))
-			db_connect.commit()
+			db.commit()
 			cursor.close()
 			
 			return JSONResponse(
@@ -503,7 +509,8 @@ def now_utc():
 
 @app.post("/api/orders")
 async def create_order(data: OrderRequest, 
-					   member: Member = Depends(get_current_member)):
+					   member: Member = Depends(get_current_member),
+					   db=Depends(get_db)):
 	try:
 		if member.member_id is None:
 			return JSONResponse(
@@ -556,7 +563,7 @@ async def create_order(data: OrderRequest,
 		else: 
 			# 建立正式訂單
 			order_number = generate_order_number()
-			cursor = db_connect.cursor()
+			cursor = db.cursor()
 			cursor.execute("""
 				  INSERT INTO tp_order(
 				  member_id, order_number, order_price, paymentStatus,
@@ -623,7 +630,7 @@ async def create_order(data: OrderRequest,
 				}
 			}
 			
-			db_connect.commit()
+			db.commit()
 			cursor.close()
 
 			return JSONResponse(
@@ -643,5 +650,49 @@ async def create_order(data: OrderRequest,
 			}
 		)
 
-		
+@app.get("/api/order")
+async def get_orders(member: Member = Depends(get_current_member),db=Depends(get_db)):
+	try:
+		if member.member_id is None:
+			return JSONResponse (
+				status_code = 403,
+				content = {
+					"error": True,
+					"message": "未登入系統，無法查詢!"
+				}
+			)
+		else:
+			cursor = db.cursor()
+			cursor.execute("""
+				  SELECT tp_order.order_number, 
+				  tp_order.tourDate, 
+				  tp_order.dateTime, 
+				  tp_order.paymentStatus, 
+				  attractions.name 
+				  FROM tp_order JOIN attractions ON tp_order.attractionId = attractions.id
+				  WHERE tp_order.member_id =%s
+				  """, (member.member_id,))
+			orders = cursor.fetchall()
+
+			columns = [desc[0] for desc in cursor.description]
+			member_orders = [dict(zip(columns, row)) for row in orders]
+
+			# print(member_orders)
+
+			return JSONResponse(
+				status_code = 200,
+				content = {
+					"data": jsonable_encoder(member_orders)
+				}
+			)
+
+	except Exception as e:
+		return JSONResponse(
+			status_code = 500,
+			content = {
+				"error": True,
+				"message": "伺服器內部錯誤，請稍後再試。",
+				"detail": str(e)
+			}
+		)
 
